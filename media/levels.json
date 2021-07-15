@@ -1,0 +1,32 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "title": "Level 1",
+      "description": "Solve this!",
+      "equation": "1 + 2 = 4",
+      "last": false
+    },
+    {
+      "id": 2,
+      "title": "Level 2",
+      "description": "Solve this!",
+      "equation": "9 - 3 = 9",
+      "last":  false
+    },
+    {
+      "id": 3,
+      "title": "Level 3",
+      "description": "Solve this!",
+      "equation": "5 - 2 = 5",
+      "last":  false
+    },
+    {
+      "id": 4,
+      "title": "Finish",
+      "description": "You won!",
+      "equation": "",
+      "last":  true
+    }
+  ]
+}

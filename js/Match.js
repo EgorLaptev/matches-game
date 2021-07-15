@@ -4,26 +4,24 @@ export default class Match {
 
     static list = []; // List of all matches
 
-    static texture = '../media/images/match.jpg';
+    static size;
 
-    static width  = 50;
-    static height = 150;
+    constructor(col, row, vertical) {
 
-    constructor(x, y) {
+        this.oldCol = col;
+        this.oldRow = row;
 
-        this.x = x;
-        this.y = y;
+        this.vertical = vertical;
+
+        this.row = row;
+        this.col = col;
+
+        this.width  = vertical ? Match.size / 10 : Match.size;
+        this.height = vertical ? Match.size : Match.size / 10;
+
+        this.texture = `../media/images/match/match-${ vertical ? 'v' : 'h' }.png`;
 
         Match.list.push(this);
-
-    }
-
-    render( ctx ) {
-
-        const matchImage = new Image();
-        matchImage.src = Match.texture;
-
-        ctx.drawImage( matchImage, this.x, this.y, Match.width, Match.height );
 
     }
 

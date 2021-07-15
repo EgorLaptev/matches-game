@@ -7,3 +7,38 @@ body {
 body * {
     box-sizing: border-box;
 }
+
+.wrap {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    user-select: none;
+}
+
+#levelTitle {
+    margin: 0;
+    font: normal 120px Arial;
+    color: #EBDAC0;
+}
+
+#levelDesc {
+    margin: 0;
+    font: normal 50px Arial;
+    color: #A69A87;
+}
+
+#continue {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    background-color: #EBDAC0;
+    color: #B89F7A;
+}
+
+#continue:disabled {
+    background-color: grey;
+    color: darkgray;
+}
