@@ -19,7 +19,8 @@ export default class Match {
         this.width  = vertical ? Match.size / 10 : Match.size;
         this.height = vertical ? Match.size : Match.size / 10;
 
-        this.texture = `../media/images/match/match-${ vertical ? 'v' : 'h' }.png`;
+        this.texture     = new Image();
+        this.texture.src = `../media/images/match/match-${ vertical ? 'v' : 'h' }.png`;
 
         Match.list.push(this);
 

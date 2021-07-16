@@ -10,14 +10,13 @@ export default class Game {
     static config = {
         bg: {
             color: '#222',
-            src: ''
+            src: '../media/images/grid-cell.png',
+            sound: {
+                audio: new Audio('../media/sounds/bg.mp3'),
+                volume: .1
+            }
         },
-        cell: {
-            size: 100,
-            color: '#191919',
-            lineWidth: 1
-        },
-        fps: 15
+        cellSize: 100
     };
 
     static paused = false;
@@ -27,12 +26,19 @@ export default class Game {
 
     static async init() {
 
+        /* Canvas options */
         this.cnv.width = window.innerWidth;
         this.cnv.height = window.innerHeight;
+        this.cnv.style.background = `${ this.config.bg?.color } url(${ this.config.bg?.src }) 0px 0px`;
+        this.cnv.style.backgroundSize = `${this.config.cellSize}px ${this.config.cellSize}px`;
 
-        this.cnv.style.background = `${ this.config.bg?.color } url(${ this.config.bg?.src }) 50% 50%`;
+        /* Background sound */
+        this.config.bg.sound.audio.volume = this.config.bg.sound.volume;
+        this.config.bg.sound.audio.loop   = true;
+        this.config.bg.sound.audio.play();
 
-        Match.size = this.config.cell.size;
+        /* Match options */
+        Match.size = this.config.cellSize;
 
         await this.updateLevel(1);
 
@@ -42,41 +48,17 @@ export default class Game {
     }
 
     static loop() {
-
-       setInterval( () => {
-           if (!Game.paused) Game.render();
-       }, 1000/this.config.fps);
-
+       if (!Game.paused) Game.render();
+       requestAnimationFrame(Game.loop);
     }
 
     static render() {
 
         this.ctx.clearRect( 0, 0, this.cnv.width, this.cnv.height );
 
-        /* Grid */
-        this.ctx.strokeStyle = this.config.cell.color;
-        this.ctx.lineWidth   = this.config.cell.lineWidth;
-        for ( let i=0; i < Math.ceil(this.cnv.width / this.config.cell.size) ; i++ ) {
-            this.ctx.moveTo( i * this.config.cell.size, 0 );
-            this.ctx.lineTo( i * this.config.cell.size, this.cnv.height );
-            this.ctx.stroke();
-        }
-
-        for ( let i=0 ; i < Math.ceil(this.cnv.height / this.config.cell.size) ; i++ ) {
-            this.ctx.moveTo( 0, i * this.config.cell.size );
-            this.ctx.lineTo( this.cnv.width, i * this.config.cell.size );
-            this.ctx.stroke();
-        }
-
         /* Matches */
-        for ( const match of Match.list ) {
-
-            const matchImage = new Image();
-            matchImage.src = match.texture;
-
-            this.ctx.drawImage( matchImage,  match.col * this.config.cell.size, match.row * this.config.cell.size, match.width, match.height );
-
-        }
+        for ( const match of Match.list )
+            this.ctx.drawImage( match.texture,  match.col * this.config.cellSize, match.row * this.config.cellSize, match.width, match.height );
 
     }
 
@@ -88,8 +70,8 @@ export default class Game {
 
             for ( const match of Match.list )
                 if (
-                    ( e.clientX >= match.col * this.config.cell.size && e.clientX <= match.col * this.config.cell.size + match.width ) &&
-                    ( e.clientY >= match.row * this.config.cell.size && e.clientY <= match.row * this.config.cell.size + match.height )
+                    ( e.clientX >= match.col * this.config.cellSize && e.clientX <= match.col * this.config.cellSize + match.width ) &&
+                    ( e.clientY >= match.row * this.config.cellSize && e.clientY <= match.row * this.config.cellSize + match.height )
                 ) controlled = match;
 
         });
@@ -114,16 +96,23 @@ export default class Game {
 
             if ( !controlled ) return false;
 
-            controlled.col = Math.floor(e.clientX / this.config.cell.size);
-            controlled.row = Math.floor(e.clientY / this.config.cell.size);
+            controlled.col = Math.floor(e.clientX / this.config.cellSize);
+            controlled.row = Math.floor(e.clientY / this.config.cellSize);
 
         });
 
     }
 
+    static restart() {
+        window.location.reload();
+    }
+
     static async updateLevel(level) { // ! Return promise
 
         Match.list = []; // Drop all matches
+
+        const levelTitle    = document.getElementById('levelTitle'),
+              levelDesc     = document.getElementById('levelDesc');
 
         this.level = await fetch('../media/levels.json')
             .then(resp => resp.json() )
@@ -131,8 +120,13 @@ export default class Game {
 
         if ( !this.level ) window.location.reload();
 
+        levelTitle.textContent = this.level.title;
+        levelDesc.textContent = this.level.description;
+
+        if ( !this.level ) this.restart();
+
         for ( const match of MatchParser.parse( this.level.equation ) )
-            new Match( match.col-1 + Math.floor( this.cnv.width/2/this.config.cell.size ) - Math.floor( this.level.equation.length / 2 ) , match.row -1 + Math.floor( this.cnv.height/2/this.config.cell.size ), match.vertical);
+            new Match( match.col-1 + Math.floor( this.cnv.width/2/this.config.cellSize ) - Math.floor( this.level.equation.length / 2 ) , match.row -1 + Math.floor( this.cnv.height/2/this.config.cellSize ), match.vertical);
 
     }
 
@@ -145,19 +139,11 @@ export default class Game {
 
         this.controls();
 
-        const continueLvl   = document.getElementById('continue'),
-              levelTitle    = document.getElementById('levelTitle'),
-              levelDesc     = document.getElementById('levelDesc');
+        const continueLvl   = document.getElementById('continue');
 
         continueLvl.addEventListener('click', async e => {
-
             await this.updateLevel(++this.level.id);
-
             if ( !this.level.last ) continueLvl.disabled = true;
-
-            levelTitle.textContent = this.level.title;
-            levelDesc.textContent = this.level.description;
-
         });
 
     }
